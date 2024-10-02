@@ -1,10 +1,14 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { StatusBar } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+
+import Routes from "./src/routes";
 
 export default function App() {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Teste</Text>
-    </View>
+    <NavigationContainer>
+      <StatusBar backgroundColor='#353840' barStyle='light-content' translucent={false} />
+      <Routes />
+    </NavigationContainer>
   )
 }
