@@ -4,11 +4,15 @@ import { NavigationContainer } from "@react-navigation/native";
 
 import Routes from "./src/routes";
 
+import AuthProvider from "./src/contexts/auth";
+
 export default function App() {
   return (
     <NavigationContainer>
-      <StatusBar backgroundColor='#353840' barStyle='light-content' translucent={false} />
-      <Routes />
+      <AuthProvider>
+        <StatusBar backgroundColor='#353840' barStyle='light-content' translucent={false} />
+        <Routes />
+      </AuthProvider>
     </NavigationContainer>
   )
 }

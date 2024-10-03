@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Text } from "react-native";
 import {
     Button,
@@ -10,11 +10,15 @@ import {
     SignUpTextButton
 } from "./styles";
 
+import { AuthContext } from "../../contexts/auth";
+
 export default function Login() {
     const [login, setLogin] = useState(true)
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+
+    const { signUp } = useContext(AuthContext)
 
     function toggleLogin() {
         setLogin(!login)
@@ -25,7 +29,7 @@ export default function Login() {
 
     function handleSignIn() {
         if (email.trim().length > 0 && password.trim().length > 0) {
-
+            signUp(name, email, password)
         } else {
             alert('PREENCHA TODOS OS CAMPOS')
         }
