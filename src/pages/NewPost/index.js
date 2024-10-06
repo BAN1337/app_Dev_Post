@@ -34,7 +34,10 @@ export default function NewPost() {
             let avatarURL = null
 
             try {
-                let response = await storage().ref('users').child(user?.uid).getDownloadURL()
+                let response = await storage()
+                    .ref('users')
+                    .child(user?.uid)
+                    .getDownloadURL()
 
                 avatarURL = response
             } catch (err) {

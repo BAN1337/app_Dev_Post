@@ -12,6 +12,7 @@ import {
     ListPosts
 } from "./styles";
 import Header from "../../components/Header";
+import PostsList from "../../components/PostsList";
 
 export default function Home() {
     const { user } = useContext(AuthContext)
@@ -68,7 +69,12 @@ export default function Home() {
                 <ListPosts
                     data={posts}
                     keyExtractor={item => item.id}
-                    renderItem={({ item }) => { }}
+                    renderItem={({ item }) => (
+                        <PostsList
+                            data={item}
+                            userId={user?.uid}
+                        />
+                    )}
                     showsVerticalScrollIndicator={false}
                 />
             )}
