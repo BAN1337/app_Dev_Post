@@ -35,7 +35,7 @@ export const ContentView = styled.View`
 
 export const Content = styled.Text`
     color: #353840;
-    margin-bottom: 20px;
+    margin: 5px 0px;
 `
 
 export const Actions = styled.View`

@@ -71,7 +71,6 @@ export default function NewPost() {
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <Container>
-
                 <Input
                     placeholder="O que está acontecendo?"
                     value={post}

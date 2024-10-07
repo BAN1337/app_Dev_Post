@@ -15,10 +15,13 @@ import Header from "../../components/Header";
 import PostsList from "../../components/PostsList";
 
 export default function Home() {
-    const { user } = useContext(AuthContext)
-
     const [posts, setPosts] = useState([])
     const [loading, setLoading] = useState(true)
+    const [loadingRefresh, setLoadingRefresh] = useState(false)
+    const [lastItem, setLastItem] = useState('')
+    const [emptyList, setEmptyList] = useState(false)
+
+    const { user } = useContext(AuthContext)
 
     const navigation = useNavigation()
 
@@ -43,7 +46,9 @@ export default function Home() {
                                 })
                             })
 
+                            setEmptyList(!!snapshot.empty)
                             setPosts(postList)
+                            setLastItem(snapshot.docs[snapshot.docs.length - 1])
                             setLoading(false)
                         }
                     })
@@ -57,6 +62,65 @@ export default function Home() {
         }, [])
     )
 
+    //Buscar por posts mais recentes ou atualizar, quando puxar sua lista para cima
+    async function handleRefreshPosts() {
+        setLoadingRefresh(true)
+
+        await firestore().collection('posts')
+            .orderBy('createdAt', 'desc')
+            .limit(5)
+            .get()
+            .then((snapshot) => {
+                setPosts([])
+                const postList = []
+
+                snapshot.docs.map(post => {
+                    postList.push({
+                        ...post.data(),
+                        id: post.id
+                    })
+                })
+
+                setEmptyList(false)
+                setPosts(postList)
+                setLastItem(snapshot.docs[snapshot.docs.length - 1])
+                setLoading(false)
+            })
+
+        setLoadingRefresh(false)
+    }
+
+    //Buscar mais posts quando chegar no final da lista
+    async function getListPosts() {
+        if (emptyList) {
+            setLoading(false)
+            return null
+        }
+
+        if (loading) return
+
+        firestore().collection('posts')
+            .orderBy('createdAt', 'desc')
+            .limit(5)
+            .startAfter(lastItem)
+            .get()
+            .then((snapshot) => {
+                const postList = []
+
+                snapshot.docs.map(post => {
+                    postList.push({
+                        ...post.data(),
+                        id: post.id
+                    })
+                })
+
+                setEmptyList(!!snapshot.empty)
+                setLastItem(snapshot.docs[snapshot.docs.length - 1])
+                setPosts(oldPosts => [...oldPosts, ...postList])
+                setLoading(false)
+            })
+    }
+
     return (
         <Container>
             <Header />
@@ -67,6 +131,7 @@ export default function Home() {
                 </View>
             ) : (
                 <ListPosts
+                    showsVerticalScrollIndicator={false}
                     data={posts}
                     keyExtractor={item => item.id}
                     renderItem={({ item }) => (
@@ -75,7 +140,10 @@ export default function Home() {
                             userId={user?.uid}
                         />
                     )}
-                    showsVerticalScrollIndicator={false}
+                    refreshing={loadingRefresh} //Serve para mostrar a bolinha de refresh, se estiver true fica mostrando, quando estiver falso, para de mostrar
+                    onRefresh={handleRefreshPosts} //Quando for atualizado ele executa a função
+                    onEndReached={() => getListPosts()} //Quando chega no final da lista ele executa a função
+                    onEndReachedThreshold={0.1} //O quando perto do final para que seja executado a função
                 />
             )}
 
