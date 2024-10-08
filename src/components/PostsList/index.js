@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { ptBR } from "date-fns/locale";
 import { formatDistance } from "date-fns";
 import firestore from '@react-native-firebase/firestore'
+import { useNavigation } from "@react-navigation/native";
 
 import {
     Container,
@@ -20,6 +21,23 @@ import {
 export default function PostsList({ data, userId }) {
 
     const [likePost, setLikePost] = useState(data?.likes)
+    const [iconLike, setIconLike] = useState(null)
+
+    const navigation = useNavigation()
+
+    useEffect(() => {
+        async function loadIconLike() {
+            const docId = `${userId}_${data.id}`
+
+            const doc = await firestore().collection('likes')
+                .doc(docId).get()
+
+            if (doc.exists) setIconLike('cards-heart')
+            else setIconLike('heart-plus-outline')
+        }
+
+        loadIconLike()
+    }, [])
 
     function formatTimePost() {
         const datePost = new Date(data.createdAt.seconds * 1000)
@@ -52,6 +70,8 @@ export default function PostsList({ data, userId }) {
                 .then(() => {
                     setLikePost(likes - 1)
                 })
+
+            setIconLike('heart-plus-outline')
         } else {
             await firestore().collection('likes')
                 .doc(docId)
@@ -68,12 +88,14 @@ export default function PostsList({ data, userId }) {
                 .then(() => {
                     setLikePost(likes + 1)
                 })
+
+            setIconLike('cards-heart')
         }
     }
 
     return (
         <Container>
-            <HeaderPost>
+            <HeaderPost onPress={() => navigation.navigate('PostsUser', { title: data.author, userId: data.userId })}>
                 {data.avatarURL ? (
                     <Avatar
                         source={{ uri: data.avatarURL }}
@@ -101,7 +123,7 @@ export default function PostsList({ data, userId }) {
                         </LikeAmount>
                     )}
                     <MaterialCommunityIcons
-                        name={likePost === 0 ? 'heart-plus-outline' : 'cards-heart'}
+                        name={iconLike}
                         color='#e52246'
                         size={20}
                     />

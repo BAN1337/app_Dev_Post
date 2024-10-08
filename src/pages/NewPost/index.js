@@ -20,7 +20,7 @@ export default function NewPost() {
     const { user } = useContext(AuthContext)
 
     useLayoutEffect(() => {
-        const options = navigation.setOptions({
+        navigation.setOptions({
             headerRight: () => (
                 <Button onPress={() => handlePost()}>
                     <TextButton>Compartilhar</TextButton>
