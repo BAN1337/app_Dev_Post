@@ -66,7 +66,7 @@ export default function Home() {
     async function handleRefreshPosts() {
         setLoadingRefresh(true)
 
-        await firestore().collection('posts')
+        firestore().collection('posts')
             .orderBy('createdAt', 'desc')
             .limit(5)
             .get()

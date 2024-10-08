@@ -21,19 +21,20 @@ import {
 export default function PostsList({ data, userId }) {
 
     const [likePost, setLikePost] = useState(data?.likes)
-    const [iconLike, setIconLike] = useState(null)
+    const [iconLike, setIconLike] = useState('heart-plus-outline')
 
     const navigation = useNavigation()
 
     useEffect(() => {
         async function loadIconLike() {
             const docId = `${userId}_${data.id}`
+            const doc = await firestore().collection('likes').doc(docId).get()
 
-            const doc = await firestore().collection('likes')
-                .doc(docId).get()
-
-            if (doc.exists) setIconLike('cards-heart')
-            else setIconLike('heart-plus-outline')
+            if (doc.exists) {
+                setIconLike('cards-heart')
+            } else {
+                setIconLike('heart-plus-outline')
+            }
         }
 
         loadIconLike()
