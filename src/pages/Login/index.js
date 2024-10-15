@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../../contexts/auth";
+import * as Animatable from 'react-native-animatable'
 
 import { Text, ActivityIndicator, Keyboard, TouchableWithoutFeedback } from "react-native";
 import {
@@ -11,6 +12,11 @@ import {
     SignUpButton,
     SignUpTextButton
 } from "./styles";
+
+const TitleAnimated = Animatable.createAnimatableComponent(Title)
+const InputAnimated = Animatable.createAnimatableComponent(Input)
+const ButtonAnimated = Animatable.createAnimatableComponent(Button)
+const SignUpButtonAnimated = Animatable.createAnimatableComponent(SignUpButton)
 
 export default function Login() {
     const [login, setLogin] = useState(true)
@@ -47,34 +53,36 @@ export default function Login() {
         return (
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                 <Container>
-                    <Title>
+                    <TitleAnimated animation='flipInY'>
                         Dev<Text style={{ color: '#e52246' }}>Post</Text>
-                    </Title>
+                    </TitleAnimated>
 
-                    <Input
+                    <InputAnimated
+                        animation='slideInLeft'
                         placeholder="email@email.com"
                         value={email}
                         onChangeText={(text) => setEmail(text)}
                     />
 
-                    <Input
+                    <InputAnimated
+                        animation='slideInRight'
                         placeholder="********"
                         value={password}
                         onChangeText={(text) => setPassword(text)}
                         secureTextEntry={true}
                     />
 
-                    <Button onPress={handleSignIn}>
+                    <ButtonAnimated animation='slideInLeft' onPress={handleSignIn}>
                         {loadingAuth ? (
                             <ActivityIndicator size={20} color='#fff' />
                         ) : (
                             <TextButton>Acessar</TextButton>
                         )}
-                    </Button>
+                    </ButtonAnimated>
 
-                    <SignUpButton onPress={toggleLogin}>
+                    <SignUpButtonAnimated animation='slideInUp' onPress={toggleLogin}>
                         <SignUpTextButton>Criar uma conta</SignUpTextButton>
-                    </SignUpButton>
+                    </SignUpButtonAnimated>
                 </Container>
             </TouchableWithoutFeedback>
         )
@@ -83,40 +91,43 @@ export default function Login() {
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <Container>
-                <Title>
+                <TitleAnimated animation='flipInX'>
                     Dev<Text style={{ color: '#e52246' }}>Post</Text>
-                </Title>
+                </TitleAnimated>
 
-                <Input
+                <InputAnimated
+                    animation='slideInRight'
                     placeholder="Seu nome"
                     value={name}
                     onChangeText={(text) => setName(text)}
                 />
 
-                <Input
+                <InputAnimated
+                    animation='slideInLeft'
                     placeholder="email@email.com"
                     value={email}
                     onChangeText={(text) => setEmail(text)}
                 />
 
-                <Input
+                <InputAnimated
+                    animation='slideInRight'
                     placeholder="********"
                     value={password}
                     onChangeText={(text) => setPassword(text)}
                     secureTextEntry={true}
                 />
 
-                <Button onPress={handleSignUp}>
+                <ButtonAnimated animation='slideInLeft' onPress={handleSignUp}>
                     {loadingAuth ? (
                         <ActivityIndicator size={20} color='#fff' />
                     ) : (
                         <TextButton>Cadastrar</TextButton>
                     )}
-                </Button>
+                </ButtonAnimated>
 
-                <SignUpButton onPress={toggleLogin}>
+                <SignUpButtonAnimated animation='slideInUp' onPress={toggleLogin}>
                     <SignUpTextButton>Já possuo uma conta</SignUpTextButton>
-                </SignUpButton>
+                </SignUpButtonAnimated>
             </Container>
         </TouchableWithoutFeedback>
     )

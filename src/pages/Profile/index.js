@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../contexts/auth";
 import Feather from 'react-native-vector-icons/Feather'
 import firestore from '@react-native-firebase/firestore'
@@ -27,6 +27,26 @@ export default function Profile() {
     const [name, setName] = useState(user?.name)
     const [url, setUrl] = useState(null)
     const [visibleModal, setVisibleModal] = useState(false)
+
+    useEffect(() => {
+        let isActive = true;
+
+        async function loadAvatar() {
+            try {
+                if (isActive) {
+                    let response = await storage().ref('users').child(user.uid).getDownloadURL()
+
+                    setUrl(response)
+                }
+            } catch (err) {
+                console.log('Não encontramos nenhuma foto!')
+            }
+        }
+
+        loadAvatar()
+
+        return () => isActive = false
+    }, [])
 
     async function handleSignOut() {
         await signOut()
