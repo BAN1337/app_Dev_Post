@@ -1,7 +1,9 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/auth";
 import Feather from 'react-native-vector-icons/Feather'
-
+import firestore from '@react-native-firebase/firestore'
+import storage from '@react-native-firebase/storage'
+import { launchImageLibrary } from "react-native-image-picker";
 
 import { Modal, Platform } from "react-native";
 import {
@@ -20,7 +22,7 @@ import {
 import Header from "../../components/Header";
 
 export default function Profile() {
-    const { user, signOut } = useContext(AuthContext)
+    const { user, signOut, setUser, storageUser } = useContext(AuthContext)
 
     const [name, setName] = useState(user?.name)
     const [url, setUrl] = useState(null)
@@ -31,7 +33,91 @@ export default function Profile() {
     }
 
     async function updateProfile() {
-        alert('teste')
+        if (name.trim().length > 0) {
+            await firestore().collection('users')
+                .doc(user?.uid)
+                .update({
+                    name: name
+                })
+
+            const postDocs = await firestore().collection('posts')
+                .where('userId', '==', user?.uid)
+                .get()
+
+            postDocs.forEach(async doc => {
+                await firestore().collection('posts')
+                    .doc(doc.id)
+                    .update({
+                        author: name
+                    })
+            })
+
+            let data = {
+                uid: user?.uid,
+                name: name,
+                email: user?.email
+            }
+
+            setUser(data)
+            storageUser(data)
+            setVisibleModal(false)
+        } else {
+            alert('Nome incorreto!')
+        }
+    }
+
+    function uploadFile() {
+        const options = {
+            noData: true,
+            mediaType: 'photo'
+        }
+
+        launchImageLibrary(options, response => {
+            if (response.didCancel) {
+                console.log('Cancelou!')
+            } else if (response.error) {
+                alert('Houve algum erro ao carregar a foto!')
+            } else {
+                uploadFileStorage(response)
+                    .then(() => {
+                        uploadAvatarPosts()
+                    })
+
+                setUrl(response.assets[0].uri)
+            }
+        })
+    }
+
+    function getFileLocalPath(response) {
+        return response.assets[0].uri;
+    }
+
+    async function uploadFileStorage(response) {
+        const fileSource = getFileLocalPath(response)
+
+        const storageRef = storage().ref('users').child(user?.uid)
+
+        return await storageRef.putFile(fileSource)
+    }
+
+    async function uploadAvatarPosts() {
+        const storageRef = storage().ref('users').child(user?.uid)
+        await storageRef.getDownloadURL()
+            .then(async (image) => {
+                const postDocs = await firestore().collection('posts')
+                    .where('userId', '==', user?.uid).get()
+
+                postDocs.forEach(async doc => {
+                    await firestore().collection('posts')
+                        .doc(doc.id)
+                        .update({
+                            avatarURL: image
+                        })
+                })
+            })
+            .catch((err) => {
+                alert('Erro ao atualizar a foto dos posts!')
+            })
     }
 
     return (
@@ -39,7 +125,7 @@ export default function Profile() {
             <Header />
 
             {url ? (
-                <UploadButton>
+                <UploadButton onPress={uploadFile}>
                     <UploadText>+</UploadText>
 
                     <Avatar
@@ -47,7 +133,7 @@ export default function Profile() {
                     />
                 </UploadButton>
             ) : (
-                <UploadButton>
+                <UploadButton onPress={uploadFile}>
                     <UploadText>+</UploadText>
 
                     <Avatar
@@ -56,7 +142,7 @@ export default function Profile() {
                 </UploadButton>
             )}
 
-            <Name numberOfLines={1}>{user?.name}</Name>
+            <Name numberOfLines={1}>{name}</Name>
 
             <Email>{user?.email}</Email>
 
